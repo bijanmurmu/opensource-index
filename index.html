@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenSource / Index</title>
+  
+  <!-- Open Graph Meta Tags for Social Media Previews -->
+  <meta property="og:title" content="OpenSource Portfolio">
+  <meta property="og:description" content="A comprehensive tracking dashboard of my open source contributions.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://bijanmurmu.github.io/opensource-index/preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  
+  <header>
+    <div id="profile-container" class="profile-header">
+      <!-- Profile dynamically injected here -->
+      <h1>OpenSource / Index</h1>
+      <p>Loading profile...</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="dashboard-top-row">
+      <!-- Standout Contributions Showcase -->
+      <div id="standout-section" class="standout-section" style="display: none;">
+        <h2 class="section-title"><i data-lucide="award" class="lucide-icon"></i> Standout Contributions</h2>
+        <div id="standout-cards" class="standout-grid"></div>
+      </div>
+
+      <!-- Language Analytics -->
+      <div id="analytics-container" class="analytics-container">
+        <!-- Language analytics injected here -->
+      </div>
+    </div>
+
+    <!-- Controls (Search, Filters, Expand) -->
+    <div class="controls-container" id="controlsContainer">
+      <button class="controls-toggle-btn" id="controlsToggleBtn" title="Search"><i data-lucide="search"></i></button>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search">
+        <span class="search-shortcut">Ctrl+Alt+K</span>
+      </div>
+      <div class="filter-actions">
+        <select id="sortRepos" class="dropdown-filter" data-prefix="Sort: ">
+          <option value="stars" selected>Most Stars</option>
+          <option value="alpha">A to Z</option>
+        </select>
+        <select id="statusFilter" class="dropdown-filter">
+          <option value="ALL">All Statuses</option>
+          <option value="OPEN">Open</option>
+          <option value="CLOSED">Closed</option>
+          <option value="MERGED">Merged</option>
+        </select>
+        <button id="toggleExpandBtn" class="action-btn">Expand All</button>
+      </div>
+    </div>
+
+    <div id="content" class="content-container">
+      <div id="loading">Loading data...</div>
+    </div>
+  </main>
+
+  <!-- Organization Modal -->
+  <div id="org-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Organization</h2>
+        <button id="modal-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div id="modal-body" class="modal-body">
+        <!-- Timeline injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="app.js?v=14"></script>
+</body>
+</html>
