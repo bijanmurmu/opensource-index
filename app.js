@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadData(retries = 3) {
     try {
-      const res = await fetch('data-meta.json?v=' + new Date().getTime());
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      const baseUrl = isLocal ? 'https://bijanmurmu.github.io/opensource-index/' : '';
+      
+      const res = await fetch(baseUrl + 'data-meta.json?v=' + new Date().getTime());
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const meta = await res.json();
       
@@ -24,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         privateCounts: { issues: 0, prs: 0, additions: 0, deletions: 0 }
       };
 
-      const promises = meta.availableYears.map(year => fetch(`data-${year}.json?v=` + new Date().getTime()).then(r => r.json()));
+      const promises = meta.availableYears.map(year => fetch(baseUrl + `data-${year}.json?v=` + new Date().getTime()).then(r => r.json()));
       const yearsData = await Promise.all(promises);
       
       yearsData.forEach(yData => {
@@ -52,7 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Retrying fetch...', retries, 'attempts left');
         setTimeout(() => loadData(retries - 1), 1500);
       } else {
-        contentDiv.innerHTML = '<p style="color: var(--danger-color); text-align: center; padding: 2rem;">Error loading data-meta.json.<br><br>This usually happens during a live GitHub deployment. Try refreshing the page in 30 seconds.</p>';
+        contentDiv.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 2rem; text-align: center; max-width: 500px; margin: 0 auto; gap: 1.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; margin-bottom: 1rem;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h2 style="font-family: var(--font-serif); font-size: 2rem; font-weight: 400; color: var(--text-main); margin: 0;">Data Unavailable</h2>
+            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 0;">Error loading data-meta.json</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-top: 0.5rem;">This usually happens during a live GitHub deployment or when data is syncing.<br><br>Please wait a moment and try refreshing.</p>
+            <button onclick="window.location.reload()" class="action-btn" style="margin-top: 1rem; padding: 0.8rem 2rem;">Reload Page</button>
+          </div>
+        `;
         console.error('Failed to load data:', err);
       }
     }
@@ -125,9 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
       <h1>${name}</h1>
       <p class="profile-bio">${bio}</p>
       <div class="profile-stats">
-        <a href="https://github.com/bijanmurmu" target="_blank" style="color: inherit; text-decoration: none;">@${login}</a> • 
-        ${followers} followers • 
-        <a href="https://bijanmurmu.github.io/link-tree" target="_blank" style="color: inherit; text-decoration: none;">Linktree</a>
+        <a href="https://github.com/bijanmurmu" target="_blank" class="editorial-profile-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          <span>@${login}</span>
+        </a>   
+        <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+          <span class="editorial-profile-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>${followers} followers</span>
+          </span>
+          <a href="https://bijanmurmu.github.io/link-tree" target="_blank" class="editorial-profile-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon custom-linktree"><path d="M12 22v-9m0 0l-6-6m6 6l6-6m-14 8h16"/></svg>
+            <span>Linktree</span>
+          </a>
+        </div>
       </div>
     `;
     document.title = `${name} | OpenSource Portfolio`;
@@ -184,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let repoIcon = '<i data-lucide="user" class="lucide-icon"></i>';
       if (meta.ownerType === 'Organization' && meta.avatarUrl) {
-        repoIcon = `<img src="${escapeHtml(meta.avatarUrl)}" class="lucide-icon" style="border-radius: 4px;" alt="Org Logo">`;
+        repoIcon = `<img src="${escapeHtml(meta.avatarUrl)}" class="index-org-avatar" alt="Org Logo">`;
       }
 
       issues = sortItems(issues, repo, 'issues');
@@ -442,10 +464,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3>Private Contributions</h3>
         <p>Contributions to private repositories are hidden to protect sensitive data.</p>
         <div class="private-stats">
-          <span class="stat-badge">${counts.issues} Issues</span>
-          <span class="stat-badge">${counts.prs} Pull Requests</span>
-          <span class="stat-badge stat-add">+${counts.additions}</span>
-          <span class="stat-badge stat-del">-${counts.deletions}</span>
+          <div class="private-stats-row">
+            <span class="stat-badge">${counts.issues} Issues</span>
+            <span class="stat-badge">${counts.prs} Pull Requests</span>
+          </div>
+          <div class="private-stats-row">
+            <span class="stat-badge stat-add">+${counts.additions}</span>
+            <span class="stat-badge stat-del">-${counts.deletions}</span>
+          </div>
         </div>
       </div>
     </div>`;

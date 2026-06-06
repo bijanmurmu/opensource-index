@@ -5,70 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpenSource / Index</title>
   
-  <!-- Open Graph Meta Tags for Social Media Previews -->
   <meta property="og:title" content="OpenSource Portfolio">
   <meta property="og:description" content="A comprehensive tracking dashboard of my open source contributions.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://bijanmurmu.github.io/opensource-index/preview.png">
-  <meta name="twitter:card" content="summary_large_image">
   
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   
-  <header>
-    <div id="profile-container" class="profile-header">
-      <!-- Profile dynamically injected here -->
-      <h1>OpenSource / Index</h1>
-      <p>Loading profile...</p>
-    </div>
-  </header>
+  <main class="editorial-layout">
+    <aside class="editorial-sidebar">
+      <div id="profile-container" class="editorial-profile">
+        <!-- Profile injected via JS -->
+      </div>
 
-  <main class="container">
-    <div class="dashboard-top-row">
-      <!-- Standout Contributions Showcase -->
-      <div id="standout-section" class="standout-section" style="display: none;">
-        <h2 class="section-title"><i data-lucide="award" class="lucide-icon"></i> Standout Contributions</h2>
+      <div class="editorial-controls" id="controlsContainer">
+        <button class="controls-toggle-btn" id="controlsToggleBtn" title="Search"><i data-lucide="search"></i></button>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search repositories...">
+          <span class="search-shortcut">Ctrl+Alt+K</span>
+        </div>
+        <div class="filter-actions">
+          <select id="sortRepos" class="editorial-select" data-prefix="Sort: ">
+            <option value="stars" selected>Most Stars</option>
+            <option value="alpha">A to Z</option>
+          </select>
+          <select id="statusFilter" class="editorial-select">
+            <option value="ALL">All Statuses</option>
+            <option value="OPEN">Open</option>
+            <option value="CLOSED">Closed</option>
+            <option value="MERGED">Merged</option>
+          </select>
+          <button id="toggleExpandBtn" class="editorial-btn">Expand All</button>
+        </div>
+      </div>
+
+      <div id="analytics-container" class="editorial-analytics">
+      </div>
+    </aside>
+
+    <section class="editorial-content">
+      <div id="standout-section" class="editorial-standout" style="display: none;">
+        <h2 class="editorial-heading">Top Organizations</h2>
         <div id="standout-cards" class="standout-grid"></div>
       </div>
 
-      <!-- Language Analytics -->
-      <div id="analytics-container" class="analytics-container">
-        <!-- Language analytics injected here -->
+      <h2 class="editorial-heading" style="margin-top: 4rem;">Index</h2>
+      <div id="content" class="content-container">
+        <div id="loading" class="editorial-loading">Reading data...</div>
       </div>
-    </div>
-
-    <!-- Controls (Search, Filters, Expand) -->
-    <div class="controls-container" id="controlsContainer">
-      <button class="controls-toggle-btn" id="controlsToggleBtn" title="Search"><i data-lucide="search"></i></button>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search">
-        <span class="search-shortcut">Ctrl+Alt+K</span>
-      </div>
-      <div class="filter-actions">
-        <select id="sortRepos" class="dropdown-filter" data-prefix="Sort: ">
-          <option value="stars" selected>Most Stars</option>
-          <option value="alpha">A to Z</option>
-        </select>
-        <select id="statusFilter" class="dropdown-filter">
-          <option value="ALL">All Statuses</option>
-          <option value="OPEN">Open</option>
-          <option value="CLOSED">Closed</option>
-          <option value="MERGED">Merged</option>
-        </select>
-        <button id="toggleExpandBtn" class="action-btn">Expand All</button>
-      </div>
-    </div>
-
-    <div id="content" class="content-container">
-      <div id="loading">Loading data...</div>
-    </div>
+    </section>
   </main>
 
-  <!-- Organization Modal -->
   <div id="org-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -76,12 +68,54 @@
         <button id="modal-close" class="modal-close-btn">&times;</button>
       </div>
       <div id="modal-body" class="modal-body">
-        <!-- Timeline injected here -->
       </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
+  <script>
+    // Build Custom Premium Dropdowns
+    document.querySelectorAll('.editorial-select').forEach(select => {
+      select.style.display = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-dropdown-wrapper';
+      
+      const trigger = document.createElement('div');
+      trigger.className = 'custom-dropdown-trigger';
+      trigger.innerHTML = `<span>${select.options[select.selectedIndex].text}</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+      
+      const list = document.createElement('div');
+      list.className = 'custom-dropdown-list';
+      
+      Array.from(select.options).forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'custom-dropdown-item';
+        item.innerText = opt.text;
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          select.value = opt.value;
+          select.dispatchEvent(new Event('change'));
+          trigger.querySelector('span').innerText = opt.text;
+          wrapper.classList.remove('open');
+        });
+        list.appendChild(item);
+      });
+      
+      wrapper.appendChild(trigger);
+      wrapper.appendChild(list);
+      select.parentNode.insertBefore(wrapper, select);
+      
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-dropdown-wrapper').forEach(w => w !== wrapper && w.classList.remove('open'));
+        wrapper.classList.toggle('open');
+      });
+    });
+    
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.custom-dropdown-wrapper').forEach(w => w.classList.remove('open'));
+    });
+  </script>
 </body>
 </html>

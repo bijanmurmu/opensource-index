@@ -22,3 +22,11 @@ A blazing fast, zero-maintenance dashboard that tracks and showcases your open-s
 3. Add it as a repository secret named `PAT_TOKEN` (`Settings > Secrets and variables > Actions`).
 4. Enable **GitHub Pages** with the Source set to **GitHub Actions**.
 5. Run the `Fetch Data and Deploy Site` workflow manually to go live immediately!
+
+## 💻 Local Development
+To work on the dashboard UI locally without needing to generate or download data:
+1. Run `npm install` (if you need to install the primer octicons).
+2. Run a local web server, for example: `npx http-server`
+3. Open the provided localhost link.
+
+The app detects when it's running locally and automatically fetches your latest live data from GitHub Pages so you can preview UI changes instantly!
