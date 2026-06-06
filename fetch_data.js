@@ -7,22 +7,33 @@ if (!TOKEN) {
   process.exit(1);
 }
 
-async function fetchFromGitHub(query, variables = {}) {
-  const res = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      'Authorization': `bearer ${TOKEN}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ query, variables })
-  });
+async function fetchFromGitHub(query, variables = {}, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `bearer ${TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query, variables })
+      });
 
-  const body = await res.json();
-  if (body.errors) {
-    console.error("GraphQL Errors:", JSON.stringify(body.errors, null, 2));
-    process.exit(1);
+      const body = await res.json();
+      if (body.errors) {
+        console.error("GraphQL Errors:", JSON.stringify(body.errors, null, 2));
+        process.exit(1);
+      }
+      return body.data;
+    } catch (error) {
+      if (i === retries - 1) {
+        console.error("Fetch failed after maximum retries:", error);
+        throw error;
+      }
+      console.warn(`Network error encountered: ${error.message}. Retrying in 2 seconds...`);
+      await new Promise(r => setTimeout(r, 2000));
+    }
   }
-  return body.data;
 }
 
 async function fetchViewerProfile() {
