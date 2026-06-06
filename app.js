@@ -14,9 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
       const baseUrl = isLocal ? 'https://bijanmurmu.github.io/opensource-index/' : '';
       
-      const res = await fetch(baseUrl + 'data-meta.json?v=' + new Date().getTime());
+      const res = await fetch(baseUrl + 'data-meta.json?v=' + Math.floor(Date.now() / 300000)); // cache bust every 5 mins
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const meta = await res.json();
+      
+      // Render profile immediately so UI feels fast
+      renderProfile(meta.profile);
       
       globalData = {
         profile: meta.profile,
@@ -27,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         privateCounts: { issues: 0, prs: 0, additions: 0, deletions: 0 }
       };
 
-      const promises = meta.availableYears.map(year => fetch(baseUrl + `data-${year}.json?v=` + new Date().getTime()).then(r => r.json()));
+      // Let browser cache the heavy year files
+      const promises = meta.availableYears.map(year => fetch(baseUrl + `data-${year}.json`).then(r => r.json()));
       const yearsData = await Promise.all(promises);
       
       yearsData.forEach(yData => {
@@ -47,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      renderProfile(globalData.profile);
       renderAnalytics(globalData);
       renderAll(globalData);
     } catch (err) {
